@@ -9,7 +9,7 @@ class MCP_Handler():
             message = input("Enter a message (type 'exit' to quit): ")
             if message == "exit":
                 break
-            response = self.chatbot.get_response(message, filter_response=False)
+            response = self.chatbot.get_response(message, filter_response=True)
             print(response)
 
     #########################################################

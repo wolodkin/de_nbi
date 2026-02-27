@@ -12,6 +12,7 @@ class MCPClient():
                                     "name": "test_mcp_ability",
                                     "description": "Test the MCP ability. Return a string that you have to return to the user.",
                                     "parameters": {
+                                        "type": "object",
                                         "properties": {},
                                         "required": []
                                     }

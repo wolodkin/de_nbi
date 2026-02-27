@@ -17,15 +17,35 @@ class Chatbot():
         
     def get_response(self, message: str, filter_response: bool = True):
         prompt = self.__create_openrouter_prompt(message)
-        print("Sending prompt to OpenRouter API: ", prompt)
+        # print("Sending prompt to OpenRouter API: ", prompt)
 
         response = self.__call_openrouter_api(prompt)
-        # self.__update_messages_history(response)
+        self.__update_messages_history(response)
+
+        self.check_for_tool_calls(response)
         return self.__filter_response(response, filter_response)
 
     #########################################################
     # Private methods
     #########################################################
+
+    def check_for_tool_calls(self, response: dict):
+        """Check for tool calls in the response from the OpenRouter API."""
+        tool_calls = response['choices'][0]['message'].get('tool_calls') or []
+        if tool_calls:
+            for tool_call in tool_calls:
+                if tool_call['function']['name'] == 'test_mcp_ability':
+                    tool_response = self.mcp_client.test_mcp_ability()
+                    self.messages.append({
+                        "role": "tool",
+                        "content": tool_call['function']['name'] + ": " + tool_response
+                    })
+
+                else:
+                    self.messages.append({
+                        "role": "tool",
+                        "content": f"Tool call {tool_call['function']['name']} not found."
+                    })
 
     def __update_messages_history(self, response: dict):
         """Update the messages history with the response from the OpenRouter API."""
@@ -69,10 +89,12 @@ class Chatbot():
             "tools": self.tools,
             "tool_choice": "auto",
             "temperature": 0.3,
-            "max_tokens": 130000,
+            "max_tokens": 4096,
             "stream": False
         }
 
         response = requests.post("https://openrouter.ai/api/v1/chat/completions", json=payload, headers=headers)
+        if not response.ok:
+            print(f"OpenRouter API Error {response.status_code}: {response.text}")
         response.raise_for_status()
         return response.json()
