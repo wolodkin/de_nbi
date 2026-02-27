@@ -1,20 +1,26 @@
+from mcp_client import MCPClient
 import requests
 
 class Chatbot():
     def __init__(self, api_path: str):
+        self.mcp_client = MCPClient()
+        
         self.api_key = self.__load_api_key(api_path)
         self.messages = []
         self.messages.append({
             "role": "system",
             "content": "You are a helpful assistant."
         })
+
+        self.tools = [self.mcp_client.test_mcp_ability_schema()]
+
         
     def get_response(self, message: str, filter_response: bool = True):
         prompt = self.__create_openrouter_prompt(message)
         print("Sending prompt to OpenRouter API: ", prompt)
 
         response = self.__call_openrouter_api(prompt)
-        self.__update_messages_history(response)
+        # self.__update_messages_history(response)
         return self.__filter_response(response, filter_response)
 
     #########################################################
@@ -60,13 +66,13 @@ class Chatbot():
         payload = {
             "model": "arcee-ai/trinity-large-preview:free",
             "messages": self.messages,
-            "tools": [],
+            "tools": self.tools,
+            "tool_choice": "auto",
             "temperature": 0.3,
             "max_tokens": 130000,
             "stream": False
         }
-        
+
         response = requests.post("https://openrouter.ai/api/v1/chat/completions", json=payload, headers=headers)
-        response.raise_for_status()  # Raises an exception for bad status code
-        result = response.json()
-        return result
+        response.raise_for_status()
+        return response.json()

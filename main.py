@@ -1,17 +1,15 @@
 from chatbot import Chatbot
-from mcp_client import MCPClient
 
 class MCP_Handler():
     def __init__(self, api_path: str):
         self.chatbot = Chatbot(api_path)
-        self.mcp_client = MCPClient()
 
     def query_model_cli_loop(self):
         while True:
             message = input("Enter a message (type 'exit' to quit): ")
             if message == "exit":
                 break
-            response = self.chatbot.get_response(message)
+            response = self.chatbot.get_response(message, filter_response=False)
             print(response)
 
     #########################################################
