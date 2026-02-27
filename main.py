@@ -6,9 +6,6 @@ class MCP_Handler():
         self.chatbot = Chatbot(api_path)
         self.mcp_client = MCPClient()
 
-    def run_query(self, message: str):
-        self.chatbot.get_response(message)
-
     def query_model_cli_loop(self):
         while True:
             message = input("Enter a message (type 'exit' to quit): ")
