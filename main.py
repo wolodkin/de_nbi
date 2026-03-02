@@ -8,7 +8,7 @@ class MCP_Handler():
         input_needed_flag = True
 
         while True:
-            print("\n--------------------------------")
+            if input_needed_flag: print("\n--------------------------------")
             message = input("Enter a message (type 'exit' to quit): ") if input_needed_flag else None
 
             response = self.chatbot.get_response(message, filter_response=True)
@@ -19,6 +19,7 @@ class MCP_Handler():
 
             elif  response["tool_call_flag"] is not None:                
                 if response["text_result"] != "": print(response["text_result"])
+                else: print("tool call without a message")
                 input_needed_flag = False
 
             else:

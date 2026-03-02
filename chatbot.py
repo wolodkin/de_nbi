@@ -1,4 +1,5 @@
 from mcp_client import MCPClient
+import json
 import requests
 
 class Chatbot():
@@ -13,16 +14,28 @@ class Chatbot():
             You are a data curator from Senckenberg Nature Research. 
             You are responsible for curating collection data from the web. In your workflow you can use several tools to help you with your task. 
             These tools are provided to you by the MCP client. Use them to get more data and combine data from different sources for your work, if necessary. 
-            You are also a helpful assistant and you can answer questions about the data you are curating. 
+            You are also a helpful assistant and you can answer questions about the data you are curating.
+            You can answer questions only about the collections and data you are curating, no other institutions or collections are part of your scope.
             Answer in the language of the user, but always use English for tools and MCP Server messages. 
             Important: If a user asks you not in English and you have to use a tool or MCP Server, always translate the user's message to English first. Use the translated message for the tool call or MCP Server call. 
-            Important: Don't answer with hypotetical information. If you don't know the answer, say so.
+            Important: Don't answer with hypothetical information. If you don't know the answer, say so.
+            Important: Always use only collection names and data you can access with the tools provided to you.
             Example: A user asks you in German: 'Welche Proben beinhalten Holz?'. Then you should use the tools and MCP Servers to get the information about the samples that contain the translated word 'wood'."""
         })
 
-        self.tools = [self.mcp_client.test_mcp_ability_schema()]
+        self.tools = [self.mcp_client.test_mcp_ability_schema(),
+                      self.mcp_client.get_collection_list_schema(),
+                      self.mcp_client.get_collection_data_as_list_schema(),
+                      self.mcp_client.get_collection_data_as_dict_schema()]
 
-        
+        # Dispatcher: tool name -> MCP client method (called with **tool_args)
+        self.__tool_handlers = {
+            "test_mcp_ability": self.mcp_client.test_mcp_ability,
+            "get_collection_list": self.mcp_client.get_collection_list,
+            "get_collection_data_as_list": self.mcp_client.get_collection_data_as_list,
+            "get_collection_data_as_dict": self.mcp_client.get_collection_data_as_dict,
+        }
+
     def get_response(self, message: str | None = None, filter_response: bool = True):
         prompt = self.__create_openrouter_prompt(message)
         # print("Sending prompt to OpenRouter API: ", prompt)
@@ -37,26 +50,46 @@ class Chatbot():
     # Private methods
     #########################################################
 
+    def __parse_tool_args(self, tool_call: dict) -> dict:
+        """Parse JSON arguments from tool_call['function']['arguments']."""
+        raw = tool_call.get('function') or {}
+        args_str = raw.get('arguments') or '{}'
+        try:
+            return json.loads(args_str)
+        except json.JSONDecodeError:
+            return {}
+
     def __check_for_tool_calls(self, response: dict):
         """Check for tool calls in the response from the OpenRouter API."""
         tool_calls = response['choices'][0]['message'].get('tool_calls') or []
-        if tool_calls:
-            for tool_call in tool_calls:
-                if tool_call['function']['name'] == 'test_mcp_ability':
-                    tool_response = self.mcp_client.test_mcp_ability()
-                    self.messages.append({
-                        "role": "tool",
-                        "tool_call_id": tool_call.get("id", ""),
-                        "content": tool_call['function']['name'] + ": " + tool_response
-                    })
-                    return True
-                else:
-                    self.messages.append({
-                        "role": "tool",
-                        "tool_call_id": tool_call.get("id", ""),
-                        "content": f"Tool call {tool_call['function']['name']} not found."
-                    })
-                    return False
+        if not tool_calls:
+            return
+
+        for tool_call in tool_calls:
+            name = tool_call['function']['name']
+            handler = self.__tool_handlers.get(name)
+
+            if handler is None:
+                self.messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.get("id", ""),
+                    "content": f"Tool call {name} not found."
+                })
+                return False
+
+            tool_args = self.__parse_tool_args(tool_call)
+            try:
+                tool_response = handler(**tool_args)
+            except Exception as e:
+                tool_response = f"Error: {e}"
+                print("Error in tool call:", name)
+
+            self.messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.get("id", ""),
+                "content": f"{name}: {tool_response}"
+            })
+        return True
 
     def __update_messages_history(self, response: dict):
         """Update the messages history with the response from the OpenRouter API.
@@ -112,7 +145,7 @@ class Chatbot():
             "tools": self.tools,
             "tool_choice": "auto",
             "temperature": 0.3,
-            "max_tokens": 30000,
+            "max_tokens": 130000,
             "stream": False
         }
 
