@@ -5,12 +5,27 @@ class MCP_Handler():
         self.chatbot = Chatbot(api_path)
 
     def query_model_cli_loop(self):
+        input_needed_flag = True
+
         while True:
-            message = input("Enter a message (type 'exit' to quit): ")
-            if message == "exit":
-                break
+            print("\n--------------------------------")
+            message = input("Enter a message (type 'exit' to quit): ") if input_needed_flag else None
+
             response = self.chatbot.get_response(message, filter_response=True)
-            print(response)
+            # print(response)
+            print("")
+
+            if message == "exit": break
+
+            elif  response["tool_call_flag"] is not None:                
+                if response["text_result"] != "": print(response["text_result"])
+                input_needed_flag = False
+
+            else:
+                print(response["text_result"])
+                input_needed_flag = True
+
+
 
     #########################################################
     # Test methods
