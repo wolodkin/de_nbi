@@ -17,13 +17,19 @@ class MCP_Handler():
 
             if message == "exit": break
 
-            elif  response["tool_call_flag"] is not None:                
-                if response["text_result"] != "": print(response["text_result"])
-                else: print("tool call without a message")
+            text = response.get("text_result")
+            has_text = text is not None and text != ""
+
+            if response["tool_call_flag"] is not None:
+                if has_text:
+                    print(text)
+                else:
+                    print("tool call without a message")
                 input_needed_flag = False
 
             else:
-                print(response["text_result"])
+                if has_text:
+                    print(text)
                 input_needed_flag = True
 
 
