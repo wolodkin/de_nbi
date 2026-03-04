@@ -11,11 +11,11 @@ class MCP_Handler():
             if input_needed_flag: print("\n--------------------------------")
             message = input("Enter a message (type 'exit' to quit): ") if input_needed_flag else None
 
+            if message == "exit": break
+
             response = self.chatbot.get_response(message, filter_response=True)
             # print(response)
             print("")
-
-            if message == "exit": break
 
             text = response.get("text_result")
             has_text = text is not None and text != ""
