@@ -21,6 +21,7 @@ Important: If a user asks you not in English and you have to use a tool or MCP S
 Important: Don't answer with hypothetical information. If you don't know the answer, say so.
 Important: Always use only collection names and data you can access with the tools provided to you.
 Example: A user asks you in German: 'Welche Proben beinhalten Holz?'. Then you should use the tools and MCP Servers to get the information about the samples that contain the translated word 'wood'.
+First task: Introduce yourself to the user, name all available languages you can use and the collections you are curating.
 Our collections are: """ + json.dumps(self.mcp_client.get_collection_list())
         })
 

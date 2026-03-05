@@ -1,4 +1,19 @@
 from utils import load_csv_file_as_list, load_csv_file_as_dict
+"""
+Here we use mcp-csv-database to access the data. Source: https://pypi.org/project/mcp-csv-database
+
+How to install the package:
+pip install mcp-csv-database
+
+If you can't install it using Kubuntu, you can try to install it using the following commands:
+
+sudo apt install python3.12-venv
+python3 -m venv .venv # Here you can choise the path for the venv. I recommend to use the project path.
+source .venv/bin/activate # Activate the venv   
+
+pip install mcp-csv-database # Install the package
+"""
+
 
 class MCPClient():
     def __init__(self):
@@ -25,7 +40,7 @@ class MCPClient():
     #########################################################
 
     #########################################################
-    # Collection methods
+    # Own collections methods
     #########################################################
 
     def get_collection_list(self):
@@ -94,6 +109,18 @@ class MCPClient():
                     },
                     "required": ["filename"]
                 }
+            }
+        }
+    #########################################################
+
+    #########################################################
+    # MCP Server methods
+    #########################################################
+
+    def get_mcp_server_list(self):
+        return {
+            "csv-database": {
+                "description": "CSV Database MCP Server"
             }
         }
     #########################################################

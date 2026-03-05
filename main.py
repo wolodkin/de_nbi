@@ -5,7 +5,7 @@ class MCP_Handler():
         self.chatbot = Chatbot(api_path)
 
     def query_model_cli_loop(self):
-        input_needed_flag = True
+        input_needed_flag = False
 
         while True:
             if input_needed_flag: print("\n--------------------------------")
