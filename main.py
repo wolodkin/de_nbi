@@ -23,8 +23,6 @@ class MCP_Handler():
             if response["tool_call_flag"] is not None:
                 if has_text:
                     print(text)
-                else:
-                    print("tool call without a message")
                 input_needed_flag = False
 
             else:

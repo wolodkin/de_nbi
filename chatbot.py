@@ -2,10 +2,13 @@ from mcp_client import MCPClient
 import json
 import requests
 
+
 class Chatbot():
     def __init__(self, api_path: str):
+        print("Initializing Chatbot...")
+
         self.mcp_client = MCPClient()
-        
+
         self.api_key = self.__load_api_key(api_path)
         self.messages = []
         self.messages.append({
@@ -27,16 +30,23 @@ Our collections are: """ + json.dumps(self.mcp_client.get_collection_list())
 
         self.tools = [self.mcp_client.test_mcp_ability_schema(),
                       self.mcp_client.get_collection_list_schema(),
-                      self.mcp_client.get_collection_data_as_list_schema(),
-                      self.mcp_client.get_collection_data_as_dict_schema()]
+                      # self.mcp_client.get_collection_data_as_list_schema(),
+                      # self.mcp_client.get_collection_data_as_dict_schema()
+                      ]
 
         # Dispatcher: tool name -> MCP client method (called with **tool_args)
         self.__tool_handlers = {
             "test_mcp_ability": self.mcp_client.test_mcp_ability,
             "get_collection_list": self.mcp_client.get_collection_list,
-            "get_collection_data_as_list": self.mcp_client.get_collection_data_as_list,
-            "get_collection_data_as_dict": self.mcp_client.get_collection_data_as_dict,
+            # "get_collection_data_as_list": self.mcp_client.get_collection_data_as_list,
+            # "get_collection_data_as_dict": self.mcp_client.get_collection_data_as_dict,
         }
+
+        # Dynamic tool loading
+        self.mcp_client.start_mcp_csv_database_server()
+        # Add MCP CSV database tool schemas so the AI model can use them
+        self.tools.extend(self.mcp_client.get_mcp_csv_database_tool_schemas()) # extend the tools list with the MCP CSV database tool schemas
+        self.__tool_handlers.update(self.mcp_client.get_mcp_tool_handlers()) # update the tool handlers with the MCP CSV database tool handlers
 
     def get_response(self, message: str | None = None, filter_response: bool = True):
         prompt = self.__create_openrouter_prompt(message)
