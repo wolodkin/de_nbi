@@ -102,7 +102,7 @@ class MCPClient():
         return {
             "02-Herbarium Senckenbergianum (FR) - Algae & Protista":{
                 "filename":"02_annotated.csv",
-                "description":"Algae & Protista collection. This collection contains data on algae and protists. Protists are single-celled or multicellular eukaryotes that do not belong to the animal, plant, or fungal kingdoms. They form a very diverse group of organisms that occur in various habitats. Protists include, for example, amoebas, diatoms, dinoflagellates, euglenoids, slime molds, and others. They play important roles in ecosystems, both as primary producers and as food for other organisms."
+                "description":"Specimen records of algae and protists from the Herbarium Senckenbergianum (FR). Each row represents one specimen. Identifiers: AQUiLA-ID, Barcode, Katalognummer, Katalognr. (alphanum.), Katalognr. (num.). Taxonomy fields: Taxon, Familie, Synonyme, Taxonomie, Typus. Collection event fields: Sammler, Sammeldatum, Sammelnummer, Bestimmer, Bestimmungsdatum. Locality fields: Fundortbeschreibung, Geographische Breite, Geographische Länge, Latitude, Longitude, Administrative Einheit, Adm. Einheit, Kontinent, Koordinatentyp. Ecological fields: Habitat, Substrat, Endwirt, Zwischenwirt, Meer, Marine Einheit."
                 }
             
         }
@@ -192,9 +192,9 @@ class MCPClient():
         if not self._mcp_ready.wait(timeout=30):
             raise RuntimeError("MCP CSV database server did not become ready within 30 seconds")
 
-        for tool_name in self.mcp_csv_database_allowed_tools:
-            if any(s.get("function", {}).get("name") == tool_name for s in (self.mcp_csv_database_schema or [])):
-                print(f"  {tool_name}: available")
+        # for tool_name in self.mcp_csv_database_allowed_tools:
+        #     if any(s.get("function", {}).get("name") == tool_name for s in (self.mcp_csv_database_schema or [])):
+        #         print(f"  {tool_name}: available")
 
     async def _run_mcp_session_async(self):
         """Run MCP session in background thread. Keeps session alive until shutdown."""

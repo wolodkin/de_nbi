@@ -24,7 +24,7 @@ Important: If a user asks you not in English and you have to use a tool or MCP S
 Important: Don't answer with hypothetical information. If you don't know the answer, say so.
 Important: Always use only collection names and data you can access with the tools provided to you.
 Example: A user asks you in German: 'Welche Proben beinhalten Holz?'. Then you should use the tools and MCP Servers to get the information about the samples that contain the translated word 'wood'.
-First task: Introduce yourself to the user, name all available languages you can use and the collections you are curating.
+First task: Check available databases using the tools provided to you. Introduce yourself to the user, name every available language you can use and the collections you are curating.
 Our collections are: """ + json.dumps(self.mcp_client.get_collection_list())
         })
 
@@ -153,11 +153,12 @@ Our collections are: """ + json.dumps(self.mcp_client.get_collection_list())
         
         payload = {
             "model": "arcee-ai/trinity-large-preview:free",
+            #"model": "anthropic/claude-haiku-4.5",
             "messages": self.messages,
             "tools": self.tools,
             "tool_choice": "auto",
             "temperature": 0.3,
-            "max_tokens": 4000,
+            "max_tokens": 40000,
             "stream": False,
             "transforms": ["middle-out"]
         }
