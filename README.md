@@ -15,13 +15,17 @@ The assistant uses OpenRouter for LLM access and an MCP-style client to read loc
 - **Python**: 3.10 or newer
 - **Python packages**:
   - `requests`
-  - `mcp-csv-database` (for the CSV-based MCP functionality, see below)
+  - `mcp` (MCP client library)
+  - `mcp-csv-database` (CSV-based MCP server for querying collection data)
 
-You can install dependencies for example with:
+Install dependencies with:
 
 ```bash
-pip install requests mcp-csv-database
+pip install requests mcp mcp-csv-database
 ```
+
+> **Note:** If installation fails on Linux, try using a virtual environment:  
+> `python3 -m venv .venv && source .venv/bin/activate` (on Windows: `.venv\Scripts\activate`)
 
 ### OpenRouter API setup
 
@@ -45,26 +49,26 @@ de_nbi/
 
 ### CSV data and MCP client
 
-The `MCPClient` class in `mcp_client.py` is responsible for accessing your collection data, which is stored in CSV files.  
-By default, it expects CSVs in a directory configured via its `path_prefix` attribute. Adjust this path to point to your own CSV data.
+The `MCPClient` in `mcp_client.py` starts an **mcp-csv-database** server in the background. It loads all CSV files from the directory configured in `path_prefix` (see line 36 in `mcp_client.py`). Adjust this path to point to your own CSV folder.
 
-- **Collections list**: `get_collection_list()` returns the available collections and the filenames used.
-- **Data access helpers** (in `utils.py`):
-  - `load_csv_file_as_list(...)`
-  - `load_csv_file_as_dict(...)`
+**Available MCP tools** (among others):
+- `list_loaded_tables` – list loaded tables
+- `execute_sql_query` – run SQL queries on the CSV data
+- `get_database_schema`, `get_table_info` – schema and column information
+- `get_data_summary`, `get_column_stats`, `analyze_missing_data`, `find_duplicates` – analysis tools
 
-Make sure your CSV files are accessible at the location configured in `MCPClient.path_prefix`.
+Additionally, `get_collection_list()` returns the collection list with descriptions. The helpers in `utils.py` (`load_csv_file_as_list`, `load_csv_file_as_dict`) are available for custom extensions.
 
 ### Running the chatbot
 
-Run the interactive CLI loop from the project root:
+Run the interactive CLI from the project root:
 
 ```bash
 python main.py
 ```
 
-You can then enter questions in your preferred language.  
-Type `exit` to quit the program.
+The chatbot starts with an automatic introduction and checks available collections. You can then enter questions in your preferred language.  
+Type `exit` to quit.
 
 ### Behavior and scope
 
